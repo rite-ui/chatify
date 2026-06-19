@@ -102,4 +102,82 @@ export const verifyEmail = async(req, res, next) => {
     } catch (error) {
         next(error);
     }
-}
+};
+
+// @POST /api/auth/forgot-password
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(200).json({ success: true, message: 'If this email exists, a reset link has been sent.' });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1h
+    await user.save({ validateBeforeSave: false });
+
+    await sendEmail({
+      to: email,
+      templateName: 'passwordReset',
+      data: [user.username, resetToken, process.env.CLIENT_URL],
+    });
+
+    res.status(200).json({ success: true, message: 'Password reset email sent.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @POST /api/auth/reset-password/:token
+export const resetPassword = async (req, res, next) => {
+    try {
+        const {token} = req.params;
+        const {password} = req.body;
+
+        if(!password || password.length < 6){
+            return res.status(400).json({success: false, message:'password must be atleast 6 characters'})
+        }
+
+        const user = await User.findOne({
+            resetPasswordToken : token,
+            resetPasswordExpiry : {$gt: Date.now()},
+        });
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+        }
+
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpiry = undefined;
+        await user.save();
+
+        sendTokenResponse(user,200,res);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @PUT /api/auth/update-profile
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { username, bio, avatar } = req.body;
+    const updates = {};
+
+    if (username) updates.username = username;
+    if (bio !== undefined) updates.bio = bio;
+    if (avatar) updates.avatar = avatar;
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({ success: true, user: user.toPublicProfile() });
+  } catch (error) {
+    next(error);
+  }
+};
