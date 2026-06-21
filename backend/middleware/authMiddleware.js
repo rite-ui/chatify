@@ -26,3 +26,21 @@ export const protect = async (req, res, next) => {
     return res.status(401).json({ success: false, message: 'Token invalid or expired.' });
   }
 };
+
+export const socketAuth = async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(' ')[1];
+
+    if (!token) return next(new Error('Authentication required'));
+
+    const decoded = verifyToken(token);
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) return next(new Error('User not found'));
+
+    socket.user = user;
+    next();
+  } catch (error) {
+    next(new Error('Invalid token'));
+  }
+};
