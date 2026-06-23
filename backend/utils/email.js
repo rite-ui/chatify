@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
-
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASSWORD:", process.env.EMAIL_PASSWORD ? "SET" : "NOT SET");
 const createTransporter = () => {
     return nodemailer.createTransport({
         host: process.env.EMAIL_HOST,

@@ -38,13 +38,14 @@ const userSchema = new mongoose.Schema(
         enum: ['online', 'offline', 'away'],
         default: 'offline'
     },
-    isVarified: {
+    isVerified: {
         type: Boolean,
         default: false
     },
-    varificationToken: String,
+    verificationToken: String,
+    verificationTokenExpiry: Date,
     resetPasswordToken: String,
-    resetPasswordExpires: Date,
+    resetPasswordExpiry: Date,
     lastSeen: {
         type: Date,
         default: Date.now,
@@ -61,10 +62,9 @@ const userSchema = new mongoose.Schema(
 );
 
 // Hash password before saving
-userSchema.pre('save',async function(next){
-    if(!this.isModified('password')) return next();
+userSchema.pre('save',async function(){
+    if(!this.isModified('password')) return;
     this.password = await bcrypt.hash(this.password, 12);
-    next();
 });
 
 // Compare passwords
@@ -81,7 +81,7 @@ userSchema.methods.toPublicProfile = function() {
         avatar: this.avatar,
         bio: this.bio,
         status: this.status,
-        isVarified: this.isVarified,
+        isVerified: this.isVerified,
         lastSeen: this.lastSeen,
         friends: this.friends,
     };
