@@ -25,9 +25,9 @@ const filteredConversations = conversations.filter((conversation) =>
 );
   return (
     <>
-        <div className='w-80 flex flex-col border-r bg-white shrink-0'>
+        <div className='w-80 h-full bg-white border-r border-gray-200 flex flex-col shrink-0'>
              {/* Header */}
-            <div className='p-4 border-4 border-gray-200'>
+            <div className='p-4 border-b border-gray-100 font-bold text-xl text-blue-600'>
                 <div className='flex items-center  justify-between mb-4'>
                     <div className='flex items-center gap-2'>
                         <div className='w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center'>

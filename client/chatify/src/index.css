@@ -1,1 +1,181 @@
 @import "tailwindcss";
+
+/* --- THEME SYSTEM CONFIGURATION (Pure CSS v4) --- */
+:root {
+  /* Dynamic Backgrounds */
+  --bg-primary: #f8f8fc;
+  --bg-secondary: #f0f0f8;
+  --bg-card: #ffffff;
+  
+  /* Typography Tokens */
+  --text-primary: #0f0f1a;
+  --text-muted: #64748b;
+  
+  /* Borders & Shadows */
+  --border: #e4e4f0;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  
+  /* Interactive Brand Colors (Purple theme) */
+  --brand-500: #7c65f9;
+  --brand-600: #6346f6;
+}
+
+/* Light / Dark Automatic Context */
+[data-theme='dark'], .dark {
+  --bg-primary: #0a0a16;
+  --bg-secondary: #11111f;
+  --bg-card: #16162a;
+  --text-primary: #f1f1f9;
+  --text-muted: #7c7c9a;
+  --border: #2a2a42;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* --- HTML RENDER OVERRIDES --- */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 200ms, color 200ms;
+}
+
+/* Scrollbar Engineering */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 101, 249, 0.3);
+  border-radius: 999px;
+  
+  &:hover {
+    background: rgba(124, 101, 249, 0.6);
+  }
+}
+
+/* --- TAILWIND V4 MODERN UTILITIES --- */
+
+@utility glass-card {
+  border-radius: 1rem;
+  box-shadow: var(--shadow);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  background-image: linear-gradient(to right, var(--brand-600), var(--brand-500));
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  box-shadow: 0 10px 15px -3px rgba(124, 101, 249, 0.25);
+  transition: all 150ms;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 150ms;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@utility input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 150ms;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(124, 101, 249, 0.3);
+    background-color: var(--bg-card);
+  }
+}
+
+@utility message-bubble-out {
+  background-image: linear-gradient(to bottom right, var(--brand-600), var(--brand-500));
+  color: white;
+  border-radius: 1rem;
+  border-bottom-right-radius: 0.375rem;
+  padding: 0.625rem 1rem;
+  max-width: 24rem;
+  box-shadow: 0 10px 15px -3px rgba(124, 101, 249, 0.15);
+}
+
+@utility message-bubble-in {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 1rem;
+  border-bottom-left-radius: 0.375rem;
+  padding: 0.625rem 1rem;
+  max-width: 24rem;
+}
+
+@utility sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  transition: all 150ms;
+
+  &:hover {
+    background-color: var(--bg-secondary);
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@utility sidebar-item-active {
+  background-color: rgba(124, 101, 249, 0.12);
+  color: var(--brand-600);
+}
+
+@utility status-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 9999px;
+  border: 2px solid var(--bg-card);
+}
