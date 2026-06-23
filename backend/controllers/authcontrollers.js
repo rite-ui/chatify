@@ -6,7 +6,6 @@ import {sendEmail} from '../utils/email.js';
 // @POST /api/auth/register
 export const register = async (req, res, next) => {
     try {
-         console.log("Step 1");
         const {username,email, password} = req.body;
 
         if(!username || !email || !password){
@@ -15,8 +14,6 @@ export const register = async (req, res, next) => {
 
         const verificationToken = crypto.randomBytes(32).toString('hex');
         const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); //24
-
-        console.log("Before Create");
 
         const user = await User.create({
             username,
@@ -27,7 +24,6 @@ export const register = async (req, res, next) => {
             avatar: `https://api.dicebear.com/8.x/avataaars/svg?seed=${username}`,
         });
 
-         console.log("After Create");
 
         await sendEmail({
             to: email,
@@ -35,10 +31,8 @@ export const register = async (req, res, next) => {
             data: [username, verificationToken, process.env.CLIENT_URL],
         });
 
-       console.log("After Email");
 
         sendTokenResponse(user,201, res);
-        console.log("After Token");
     } catch (error) {
         next(error);
     }
