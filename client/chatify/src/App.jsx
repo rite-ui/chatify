@@ -1,19 +1,17 @@
-import { useState, } from 'react';
+//import { useState, } from 'react';
 import Sidebar from './components/layouts/Sidebar.jsx';
+import useChatStore from './context/chatStore.js';
 
 export default function App() {
-  const [activeConversation, setActiveConversation] = useState(null);
+  
+  // 2. Local useState hatakar direct Zustand store se data aur helper function nikal liya
+  const { activeConversation, setActiveConversation } = useChatStore();
 
   return (
     <div className="flex h-screen w-screen bg-(--bg-primary) text-(--text-primary) overflow-hidden transition-colors duration-200">
       
       {/* Humne saara dabba hata kar actual Component jod diya aur saari states bhej di */}
-      <Sidebar 
-        //theme={theme}
-        //toggleTheme={toggleTheme}
-        activeConversation={activeConversation}
-        setActiveConversation={setActiveConversation}
-      />
+      <Sidebar />
 
       {/* ================= SLOT B: MAIN VIEW SHELL ================= */}
       <div className="flex-1 h-full flex flex-col justify-center items-center text-(--text-muted) bg-(--bg-primary)">
