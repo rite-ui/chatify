@@ -18,11 +18,12 @@ router.get('/conversations', getConversations);
 router.post('/conversations/direct', createOrGetDirectConversation);
 router.post('/conversations/group', createGroupConversation);
 
+// Users
+router.get('/users/search', searchUsers);
+
 // Messages
 router.get('/messages/:conversationId', getMessages);
 router.delete('/messages/:messageId', deleteMessage);
 
-// Users
-router.get('/users/search', searchUsers);
 
 export default router;
