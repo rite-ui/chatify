@@ -1,70 +1,106 @@
 import { create } from 'zustand';
-// import { axiosInstance } from '../lib/axios'; // Jab backend jodenge tab uncomment karenge
 
-export const useChatStore = create((set, get) => ({
-  // 1. STATES (Global Data Storage)
-  conversations: [],       // Saare contacts ki list
-  activeConversation: null, // Jis dost par click kiya hai uski details
-  messages: [],            // Active chat ke saare message bubbles
-  isUsersLoading: false,   // Left sidebar loading spinner/skeleton ke liye
-  isMessagesLoading: false,// Right chat area loading spinner ke liye
+const useChatStore = create((set, get) => ({
+  // DUMMY DATA FOR SIDEBAR SIMULATION
+  conversations: [
+    { 
+      _id: "conv_1", 
+      name: "Aman", 
+      type: "dm",
+      participants: [{ _id: "ME", username: "Ritesh Dev" }, { _id: "user_1", username: "Aman", status: "online" }],
+      lastMessage: { content: "Hello bro, design system kaisa laga?" },
+      updatedAt: new Date()
+    },
+    { 
+      _id: "conv_2", 
+      name: "Dev Group", 
+      type: "group",
+      participants: [{ _id: "ME" }, { _id: "user_2" }, { _id: "user_3" }],
+      lastMessage: { content: "React 19 aur Tailwind v4 rock! 🚀" },
+      updatedAt: new Date()
+    },
+    { 
+      _id: "conv_3", 
+      name: " Group", 
+      type: "group",
+      participants: [{ _id: "ME" }, { _id: "user_2" }, { _id: "user_3" }],
+      lastMessage: { content: "React 19 aur Tailwind v4 rock! 🚀" },
+      updatedAt: new Date()
+    },
+    { 
+      _id: "conv_4", 
+      name: "Devji Group", 
+      type: "group",
+      participants: [{ _id: "ME" }, { _id: "user_2" }, { _id: "user_3" }],
+      lastMessage: { content: "React 19 aur Tailwind v4 rock! 🚀" },
+      updatedAt: new Date()
+    }
+  ],
+  activeConversation: null,
+  messages: {},      // conversationId → Message[]
+  typingUsers: {},   // conversationId → TypingInfo[]
+  onlineUsers: [],
+  loading: false,
+  msgLoading: false,
 
-  // 2. ACTIONS (Functions to change states / API calls)
-  
-  // Sidebar ke saare users database se fetch karne ke liye
-  getConversations: async () => {
-    set({ isUsersLoading: true });
-    try {
-      // Asli full-stack flow me aisa hoga:
-      // const res = await axiosInstance.get("/messages/users");
-      // set({ conversations: res.data });
-      
-      // Abhi test karne ke liye empty array ya dummy logic:
-      set({ conversations: [] });
-    } catch (error) {
-      console.error("Error fetching conversations:", error);
-    } finally {
-      set({ isUsersLoading: false });
+  fetchConversations: async () => {
+    // Already dummy conversations upar hardcoded hain
+  },
+
+  setActiveConversation: (conv) => {
+    set({ activeConversation: conv });
+    if (conv && !get().messages[conv._id]) {
+      // Shuruat me khali array set kar rahe hain taaki error na aaye
+      set((s) => ({
+        messages: { ...s.messages, [conv._id]: [] }
+      }));
     }
   },
 
-  // Active chat ke saare purane messages database se nikalne ke liye
-  getMessages: async (userId) => {
-    set({ isMessagesLoading: true });
-    try {
-      // Fake console.log taaki ESLint ko lage ki userId use ho raha hai aur warning hat jaye ✅
-      console.log("Fetching messages for user:", userId);
-      
-      // const res = await axiosInstance.get(`/messages/${userId}`);
-      // set({ messages: res.data });
-      set({ messages: [] });
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      set({ isMessagesLoading: false });
-    }
+  fetchMessages: async (conversationId) => {
+    set({ msgLoading: true });
+    // Fake loading effect to check your spinner layout
+    setTimeout(() => {
+      set({ msgLoading: false });
+    }, 400);
   },
 
-  // Naya message send karne ke liye (Database + Socket room)
-  sendMessage: async (messageData) => {
-    const { activeConversation, messages } = get();
-    try {
-      // Fake check taaki activeConversation use ho jaye aur warning saaf ho jaye ✅
-      if (!activeConversation) return;
-
-      // const res = await axiosInstance.post(`/messages/send/${activeConversation._id}`, messageData);
-      // set({ messages: [...messages, res.data] });
-      
-      // Local testing state
-      set({ messages: [...messages, messageData] });
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
+  updateConversationLastMessage: (conversationId, message) => {
+    set((s) => ({
+      conversations: s.conversations.map((c) =>
+        c._id === conversationId ? { ...c, lastMessage: message, updatedAt: new Date() } : c
+      ),
+    }));
   },
 
-  // Active user select karne ka helper function
-  setActiveConversation: (activeConversation) => set({ activeConversation }),
+  // Mock Socket send simulation to keep frontend fully interactive!
+  sendMessage: (conversationId, content, replyTo = null) => {
+    const newMsg = {
+      _id: Date.now().toString(),
+      conversation: conversationId,
+      content: content,
+      type: 'text',
+      sender: { _id: "ME", username: "Ritesh Dev" },
+      createdAt: new Date().toISOString(),
+      readBy: [],
+      reactions: [],
+      replyTo: replyTo
+    };
 
+    set((s) => ({
+      messages: {
+        ...s.messages,
+        [conversationId]: [...(s.messages[conversationId] || []), newMsg],
+      },
+    }));
+
+    get().updateConversationLastMessage(conversationId, newMsg);
+    return Promise.resolve(newMsg);
+  },
+
+  setTyping: () => {},
+  setOnlineUsers: () => {},
+  updateUserStatus: () => {},
 }));
 
 export default useChatStore;
