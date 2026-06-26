@@ -1,46 +1,36 @@
-//import { useState, } from 'react';
 import Sidebar from './components/layouts/Sidebar.jsx';
+import ChatWindow from './components/chat/ChatWindow.jsx';
 import useChatStore from './context/chatStore.js';
 
 export default function App() {
-  
-  // 2. Local useState hatakar direct Zustand store se data aur helper function nikal liya
-  const { activeConversation, setActiveConversation } = useChatStore();
+  // Zustand store se activeConversation state ko nikala
+  const { activeConversation } = useChatStore();
 
   return (
     <div className="flex h-screen w-screen bg-(--bg-primary) text-(--text-primary) overflow-hidden transition-colors duration-200">
       
-      {/* Humne saara dabba hata kar actual Component jod diya aur saari states bhej di */}
+      {/* 1. LEFT SIDEBAR */}
       <Sidebar />
 
-      {/* ================= SLOT B: MAIN VIEW SHELL ================= */}
-      <div className="flex-1 h-full flex flex-col justify-center items-center text-(--text-muted) bg-(--bg-primary)">
+      {/* 2. RIGHT CHAT WINDOW AREA */}
+      <div className="flex-1 h-full min-w-0 relative">
         {activeConversation ? (
-          <div className="text-center space-y-2">
-            <span className="text-4xl">💬</span>
-            <div className="text-xl font-bold text-(--text-primary)">
-              Streaming Chat Thread: <span className="text-(--brand-600)">{activeConversation.name}</span>
-            </div>
-            <button 
-              onClick={() => setActiveConversation(null)}
-              className="text-xs text-red-500 hover:underline cursor-pointer"
-            >
-              Close Thread
-            </button>
-          </div>
+          /* Agar koi contact selected hai, toh ChatWindow dikhao */
+          <ChatWindow />
         ) : (
-          <div className="text-center space-y-3 p-6 max-w-sm glass-card">
-            <p className="text-lg font-bold text-(--text-primary)">Shell State Operational</p>
-            <p className="text-xs text-(--text-muted) leading-relaxed">
-              Parent routing configured. Click the simulation button below to trigger data routing test.
-            </p>
-            
-            <button 
-              onClick={() => setActiveConversation({ _id: "1", name: "Aman (MERN Dev)" })}
-              className="btn-primary w-full text-xs py-2 mt-2 cursor-pointer"
-            >
-              Test State Propagation
-            </button>
+          /* Agar koi chat select nahi hai, toh Welcome Screen dikhao */
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-(--bg-primary) select-none gap-3">
+            <div className="w-16 h-16 rounded-2xl bg-(--bg-secondary) flex items-center justify-center text-3xl shadow-xs border border-(--border)">
+              💬
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-(--text-primary)">
+                Welcome to Chatify
+              </h3>
+              <p className="text-(--text-muted) text-xs max-w-xs leading-relaxed mt-1">
+                Select a conversation from the sidebar to start chatting or checking data packets.
+              </p>
+            </div>
           </div>
         )}
       </div>
