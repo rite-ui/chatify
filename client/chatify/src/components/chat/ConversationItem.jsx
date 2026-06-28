@@ -1,12 +1,12 @@
 import { formatDistanceToNow } from 'date-fns';
 import Avatar from '../ui/Avatar.jsx';
+import useAuthStore from '../../context/authStore.js';
 
 const ConversationItem = ({ conversation, isActive, onClick }) => {
-  // ✅ FIXED: Unused activeConversation state nikal diya linter ko happy rakhne ke liye
-  const CURRENT_USER_ID = 'user_logged_in_luxe'; 
+  const { user } = useAuthStore();
 
   const getDisplayInfo = () => {
-    if (conversation.type === 'group' || conversation.isGroup) {
+    if (conversation.type === 'group') {
       return {
         name:   conversation.name,
         avatar: conversation.avatar,
@@ -14,10 +14,9 @@ const ConversationItem = ({ conversation, isActive, onClick }) => {
         isGroup: true,
       };
     }
-    
-    const other = conversation.participants?.find((p) => p._id !== CURRENT_USER_ID) || conversation.participants?.[0];
+    const other = conversation.participants?.find((p) => p._id !== user?._id);
     return {
-      name:    other?.username || conversation.name || 'Unknown',
+      name:    other?.username || 'Unknown',
       avatar:  other?.avatar,
       status:  other?.status,
       isGroup: false,
@@ -27,17 +26,15 @@ const ConversationItem = ({ conversation, isActive, onClick }) => {
 
   const info        = getDisplayInfo();
   const lastMsg     = conversation.lastMessage;
-  const lastContent = typeof lastMsg === 'string' ? lastMsg : (lastMsg?.content || 'No messages yet');
-  
-  const lastTime = conversation.updatedAt
+  const lastContent = lastMsg?.content || 'No messages yet';
+  const lastTime    = conversation.updatedAt
     ? formatDistanceToNow(new Date(conversation.updatedAt), { addSuffix: true })
-    : 'Just now';
+    : '';
 
   return (
     <div
       onClick={onClick}
       className={`sidebar-item ${isActive ? 'sidebar-item-active' : ''}`}
-      style={{ cursor: 'pointer' }}
     >
       <div className="relative">
         {info.isGroup ? (
@@ -57,7 +54,7 @@ const ConversationItem = ({ conversation, isActive, onClick }) => {
           )}
         </div>
         <p className="text-xs text-(--text-muted) truncate mt-0.5">
-          {lastMsg?.sender?._id === CURRENT_USER_ID ? 'You: ' : ''}
+          {lastMsg?.sender?._id === user?._id ? 'You: ' : ''}
           {lastContent}
         </p>
       </div>
