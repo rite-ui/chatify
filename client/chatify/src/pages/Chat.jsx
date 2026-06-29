@@ -29,7 +29,6 @@ const Chat = () => {
   }
 
   return (
-    // ✅ MODERN: Fully locked layout using Tailwind v4 native functional variables variables
     <div className="flex h-screen w-full overflow-hidden bg-(--bg-primary) text-(--text-primary) antialiased select-none transition-colors duration-200">
       
       {/* 1. Sidebar Stream Interface */}

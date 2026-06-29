@@ -39,8 +39,8 @@ const Sidebar = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
               {/* ✅ FIXED: Added rich solid brand color layers so Zap icon is fully visible in Light/Dark mode */}
-              <div className="w-8.5 h-8.5 rounded-xl bg-linear-to-br from-brand-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-brand-500/20">
-                <Zap className="w-4.5 h-4.5 fill-white text-white" />
+              <div className="w-8.5 h-8.5 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
+                <Zap className="w-4.5 h-4.5 fill-current text-white animate-pulse" />
               </div>
               <span className="font-display font-black text-xl tracking-tight text-(--text-primary)">
                 Chatify
