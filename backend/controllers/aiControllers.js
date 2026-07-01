@@ -1,5 +1,9 @@
-import Message from '../models/message.model.js'
+import { GoogleGenAI } from '@google/genai';
+import Message from '../models/message.model.js';
 import Conversation from '../models/conversation.model.js';
+
+// Gemini SDK को इनिशियलाइज़ करें
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // @POST /api/ai/chat
 export const aiChat = async (req, res, next) => {
@@ -21,31 +25,19 @@ export const aiChat = async (req, res, next) => {
       }
     }
 
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 1024,
-        system: `You are a helpful AI assistant in a chat application called ChatApp. 
+    // --- GEMINI API CALL ---
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash', // तेज़ और चैट के लिए बेस्ट मॉडल
+      contents: prompt,
+      config: {
+        systemInstruction: `You are a helpful AI assistant in a chat application called ChatApp. 
           Be concise, friendly, and helpful. Format responses with markdown when appropriate.
           Current user: ${req.user.username}`,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+        maxOutputTokens: 1024,
+      },
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error?.message || 'AI request failed');
-    }
-
-    const aiResponse = data.content[0]?.text || 'No response generated.';
+    const aiResponse = response.text || 'No response generated.';
 
     // Save AI message to conversation if provided
     let savedMessage = null;
@@ -57,7 +49,7 @@ export const aiChat = async (req, res, next) => {
         type: 'ai',
         aiMetadata: {
           prompt,
-          model: 'claude-3-haiku-20240307',
+          model: 'gemini-2.5-flash',
         },
       });
 
@@ -79,7 +71,7 @@ export const aiChat = async (req, res, next) => {
   }
 };
 
-// @POST /api/ai/summarize
+// @GET /api/ai/summarize/:conversationId
 export const summarizeConversation = async (req, res, next) => {
   try {
     const { conversationId } = req.params;
@@ -103,27 +95,16 @@ export const summarizeConversation = async (req, res, next) => {
       .map((m) => `${m.sender.username}: ${m.content}`)
       .join('\n');
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+    // --- GEMINI SUMMARIZE CALL ---
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Summarize this conversation in 3-5 bullet points:\n\n${transcript}`,
+      config: {
+        maxOutputTokens: 512,
       },
-      body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 512,
-        messages: [
-          {
-            role: 'user',
-            content: `Summarize this conversation in 3-5 bullet points:\n\n${transcript}`,
-          },
-        ],
-      }),
     });
 
-    const data = await response.json();
-    const summary = data.content[0]?.text || 'Could not generate summary.';
+    const summary = response.text || 'Could not generate summary.';
 
     res.status(200).json({ success: true, summary });
   } catch (error) {
@@ -131,7 +112,7 @@ export const summarizeConversation = async (req, res, next) => {
   }
 };
 
-// @POST /api/ai/suggest-reply
+// @GET /api/ai/suggest-reply/:conversationId
 export const suggestReply = async (req, res, next) => {
   try {
     const { conversationId } = req.params;
@@ -146,31 +127,21 @@ export const suggestReply = async (req, res, next) => {
       .map((m) => `${m.sender.username}: ${m.content}`)
       .join('\n');
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+    // --- GEMINI SUGGEST REPLY CALL WITH JSON RESPONSE ---
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Based on this conversation, suggest 3 short reply options for ${req.user.username}. Return only a JSON array of strings.\n\n${recentMessages}`,
+      config: {
+        maxOutputTokens: 256,
+        // responseMimeType सुनिश्चित करता है कि जेमिनी सिर्फ वैलिड JSON ही रिटर्न करे
+        responseMimeType: 'application/json',
       },
-      body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 256,
-        messages: [
-          {
-            role: 'user',
-            content: `Based on this conversation, suggest 3 short reply options for ${req.user.username}. Return only a JSON array of strings.\n\n${recentMessages}`,
-          },
-        ],
-      }),
     });
 
-    const data = await response.json();
     let suggestions = [];
-
     try {
-      const text = data.content[0]?.text || '[]';
-      suggestions = JSON.parse(text.replace(/```json|```/g, '').trim());
+      const text = response.text || '[]';
+      suggestions = JSON.parse(text.trim());
     } catch {
       suggestions = ['Sounds good!', 'I agree!', 'Thanks for letting me know.'];
     }

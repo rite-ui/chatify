@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import {createServer} from 'http';
 import { Server  } from 'socket.io';
@@ -11,7 +12,6 @@ import {errorHandler,notFound} from './middleware/errorHandler.js';
 import { initSocket } from './socket/socketHandler.js';
 
 
-dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
