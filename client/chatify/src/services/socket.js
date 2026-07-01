@@ -1,28 +1,21 @@
+import { io } from 'socket.io-client';
+
 let socket = null;
-const eventHandlers = {};
 
 export const initSocket = (token) => {
-  if (token) console.log('🔌 [Dummy Socket] Initialized token node pipeline');
   if (socket?.connected) return socket;
 
-  socket = {
-    connected: true,
-    id: 'mock_socket_session_777',
-    
-    on: (event, callback) => {
-      eventHandlers[event] = callback;
-      console.log(`📥 [Socket.on] Hooked listener onto event: "${event}"`);
-    },
+  socket = io(import.meta.env.VITE_SERVER_URL || 'http://localhost:5000', {
+    auth: { token },
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+  });
 
-    off: (event) => {
-      delete eventHandlers[event];
-      console.log(`🔌 [Socket.off] Cleaned up event handler for: "${event}"`);
-    },
-
-    emit: (event, data) => {
-      console.log(`📤 [Socket.emit] Syncing packet data to server channel: "${event}"`, data);
-    }
-  };
+  socket.on('connect', () => console.log('🔌 Socket connected'));
+  socket.on('disconnect', (reason) => console.log('🔌 Socket disconnected:', reason));
+  socket.on('connect_error', (err) => console.error('Socket error:', err.message));
 
   return socket;
 };
@@ -31,8 +24,8 @@ export const getSocket = () => socket;
 
 export const disconnectSocket = () => {
   if (socket) {
+    socket.disconnect();
     socket = null;
-    console.log('🎯 [Dummy Socket] Connections cleanly cleared.');
   }
 };
 
