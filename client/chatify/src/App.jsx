@@ -5,6 +5,9 @@ import useAuthStore from './context/authStore.js';
 import useThemeStore from './context/themeStore.js';
 import ProtectedRoute, { GuestRoute } from './components/auth/ProtectedRoute.jsx';
 
+// 🌟 Import the custom ThemeToggle component
+import ThemeToggle from './components/ui/ThemeToggle.jsx';
+
 // Pages Matrix
 import Login         from './pages/Login.jsx';
 import Register      from './pages/Register.jsx';
@@ -37,6 +40,8 @@ const App = () => {
   }
   return (
     <BrowserRouter>
+    {/* 🌟 Global Theme Toggle Button Control — Rendered across ALL paths */}
+    <ThemeToggle />
       {/* Dynamic Toast Network Context matching Theme parameters */}
       <Toaster
         position="top-right"

@@ -52,7 +52,7 @@ const VerifyEmail = () => {
       >
         {/* Brand Header Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-600 text-white shadow-md shadow-brand-500/20 mb-3.5">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-500/20 mb-3.5">
             <Zap className="w-5 h-5 fill-white" />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-(--text-primary)">

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Bot, Sparkles, ChevronDown, Phone, Video, Info } from 'lucide-react';
+import { Bot, Sparkles, ChevronDown, Phone, Video, Info, ArrowLeft } from 'lucide-react'; // 👈 ArrowLeft import kiya
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useChatStore from '../../context/chatStore.js';
@@ -28,7 +28,8 @@ const TypingIndicator = ({ users }) => {
 };
 
 const ChatWindow = () => {
-  const { activeConversation, messages, typingUsers, msgLoading, fetchMessages } = useChatStore();
+  // 🌟 Added 'setActiveConversation' to clear state on back click
+  const { activeConversation, setActiveConversation, messages, typingUsers, msgLoading, fetchMessages } = useChatStore();
   const { user } = useAuthStore();
   const [replyTo, setReplyTo] = useState(null);
   const [summary, setSummary] = useState('');
@@ -125,6 +126,16 @@ const ChatWindow = () => {
       {/* ─── 2. CHAT TOP HEADER BAR ─────────────────────────────────────────── */}
       <div className="h-18 flex items-center justify-between px-6 border-b border-(--border) bg-(--bg-card) shrink-0 z-10 shadow-xs">
         <div className="flex items-center gap-3 min-w-0">
+          
+          {/* 🌟 FIXED: Responsive Back Arrow Control Node (Only displays on mobile viewports) */}
+          <button 
+            onClick={() => setActiveConversation(null)} 
+            className="flex md:hidden p-2 -ml-2 rounded-xl text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-secondary) transition-all active:scale-95 cursor-pointer shrink-0"
+            title="Go back to dashboard"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+
           {activeConversation.type === 'group' ? (
             <div className="w-10 h-10 rounded-xl bg-linear-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0">
               {headerName.slice(0, 2).toUpperCase()}
@@ -133,7 +144,6 @@ const ChatWindow = () => {
             <Avatar user={getOtherParticipant() || { username: headerName, status: headerSub.toLowerCase() }} size="md" showStatus />
           )}
           <div className="min-w-0">
-            {/* ✅ Fixed typo here: changed from --var-text-primary to standard --text-primary */}
             <h2 className="font-semibold text-sm text-(--text-primary) truncate leading-snug">{headerName}</h2>
             <p className={`text-xs mt-0.5 font-medium ${headerSub === 'Online' ? 'text-emerald-500' : 'text-(--text-muted)'}`}>
               {headerSub}

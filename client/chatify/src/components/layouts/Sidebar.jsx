@@ -32,14 +32,14 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="w-75 lg:w-[320px] flex flex-col border-r border-(--border) bg-(--bg-card) shrink-0 h-full transition-colors duration-200">
+      {/* ✅ FIXED: w-full lagaya taaki mobile par full screen ho, aur md:w-[320px] desktop par fix rahe */}
+      <div className="w-full md:w-75 lg:w-[320px] flex flex-col border-r border-(--border) bg-(--bg-card) shrink-0 h-full transition-colors duration-200">
         
-        {/* ─── 🔥 FIXED BRAND LOGO HEADER BLOCK ─── */}
+        {/* ─── 🔥 BRAND LOGO HEADER BLOCK ─── */}
         <div className="px-5 py-4 border-b border-(--border)">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              {/* ✅ FIXED: Added rich solid brand color layers so Zap icon is fully visible in Light/Dark mode */}
-              <div className="w-8.5 h-8.5 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-amber-500/20">
+              <div className="w-8.5 h-8.5 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/20">
                 <Zap className="w-4.5 h-4.5 fill-current text-white animate-pulse" />
               </div>
               <span className="font-display font-black text-xl tracking-tight text-(--text-primary)">
@@ -47,18 +47,22 @@ const Sidebar = () => {
               </span>
             </div>
             
-            {/* System Actions */}
+            {/* 🌟 System Actions: Theme toggle button is BACK inside sidebar header */}
             <div className="flex items-center gap-1">
               <button 
                 onClick={toggleTheme} 
-                className="p-2 rounded-xl text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-secondary) transition-all active:scale-95" 
+                className="p-2 rounded-xl text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-secondary) transition-all active:scale-95 cursor-pointer" 
                 title="Toggle theme"
               >
-                {theme === 'dark' ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+                {theme === 'dark' ? (
+                  <Sun className="w-4.5 h-4.5 text-amber-500 fill-amber-500" />
+                ) : (
+                  <Moon className="w-4.5 h-4.5 text-indigo-600 fill-indigo-100" />
+                )}
               </button>
               <button 
                 onClick={() => setShowNew(true)} 
-                className="p-2 rounded-xl text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-secondary) transition-all active:scale-95" 
+                className="p-2 rounded-xl text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-secondary) transition-all active:scale-95 cursor-pointer" 
                 title="New conversation"
               >
                 <Plus className="w-4.5 h-4.5" />
@@ -74,7 +78,7 @@ const Sidebar = () => {
               placeholder="Search conversations…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9.5 pr-4 py-2 bg-(--bg-primary) border border-(--border) rounded-xl text-xs font-medium focus:outline-none focus:border-brand-500/50 text-(--text-primary) placeholder-(--text-muted) transition-all"
+              className="w-full pl-9.5 pr-4 py-2 bg-(--bg-primary) border border-(--border) rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500/50 text-(--text-primary) placeholder-(--text-muted) transition-all"
             />
           </div>
         </div>
@@ -104,7 +108,7 @@ const Sidebar = () => {
               {!search && (
                 <button 
                   onClick={() => setShowNew(true)} 
-                  className="bg-brand-600 hover:bg-brand-700 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-lg shadow-xs transition-all active:scale-95 cursor-pointer"
                 >
                   Start conversation
                 </button>
@@ -136,11 +140,11 @@ const Sidebar = () => {
         <div className="px-3 py-3 border-t border-(--border) flex items-center gap-2 bg-(--bg-card) shrink-0 z-10">
           <button 
             onClick={() => setShowProfile(true)} 
-            className="flex items-center gap-2 flex-1 min-w-0 rounded-xl p-2 hover:bg-(--bg-secondary) transition-all active:scale-98 text-left group"
+            className="flex items-center gap-2 flex-1 min-w-0 rounded-xl p-2 hover:bg-(--bg-secondary) transition-all active:scale-98 text-left group cursor-pointer"
           >
             <Avatar user={user || { username: "Ritesh Dev" }} size="sm" showStatus />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-(--text-primary) truncate group-hover:text-brand-500 transition-colors">
+              <p className="text-xs font-bold text-(--text-primary) truncate group-hover:text-indigo-500 transition-colors">
                 {user?.username || "Ritesh Dev"}
               </p>
               <p className="text-[11px] font-medium text-(--text-muted) truncate mt-0.5">
@@ -151,7 +155,7 @@ const Sidebar = () => {
           <button 
             onClick={logout} 
             title="Logout Stream" 
-            className="p-2.5 rounded-xl text-(--text-muted) hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
+            className="p-2.5 rounded-xl text-(--text-muted) hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90 cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
           </button>
