@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { authAPI } from '../services/api.js';
 import { initSocket, disconnectSocket } from '../services/socket.js';
 
-const useAuthStore = create((set, ) => ({
+const useAuthStore = create((set,) => ({
   user:      null,
   token:     localStorage.getItem('token'),
   loading:   false,

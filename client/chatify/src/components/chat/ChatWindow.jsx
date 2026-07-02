@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Bot, Sparkles, ChevronDown, Phone, Video, Info, ArrowLeft } from 'lucide-react'; // 👈 ArrowLeft import kiya
+import { Bot, Sparkles, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useChatStore from '../../context/chatStore.js';
@@ -9,27 +9,23 @@ import MessageBubble from './MessageBubble.jsx';
 import MessageInput from './MessageInput.jsx';
 import Avatar from '../ui/Avatar.jsx';
 
-// ─── MODERN TYPING INDICATOR (TAILWIND V4 SYNTAX) ───────────────────────────
 const TypingIndicator = ({ users }) => {
   if (!users?.length) return null;
-  const names = users.map((u) => u.username || 'Someone').join(', ');
+  const names = users.map((u) => u.username).join(', ');
   return (
-    <div className="flex items-center gap-2 px-6 pb-3 animate-fade-in">
-      <div className="flex items-center gap-2 bg-(--bg-card) border border-(--border) rounded-2xl px-4 py-2 shadow-xs backdrop-blur-md">
-        <span className="flex gap-1 items-center">
-          <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
-          <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
-          <span className="w-1.5 h-1.5 bg-brand-500 rounded-full animate-bounce" />
-        </span>
-        <span className="text-xs font-medium text-(--text-muted) ml-1">{names} typing…</span>
+    <div className="flex items-center gap-2 px-4 pb-2 animate-fade-in">
+      <div className="flex gap-0.5 items-center bg-(--bg-card) border border-(--border) rounded-xl px-3 py-2 shadow-sm">
+        <span className="typing-dot" style={{ animationDelay: '0ms' }} />
+        <span className="typing-dot" style={{ animationDelay: '200ms' }} />
+        <span className="typing-dot" style={{ animationDelay: '400ms' }} />
+        <span className="text-xs text-(--text-muted) ml-2">{names} typing…</span>
       </div>
     </div>
   );
 };
 
 const ChatWindow = () => {
-  // 🌟 Added 'setActiveConversation' to clear state on back click
-  const { activeConversation, setActiveConversation, messages, typingUsers, msgLoading, fetchMessages } = useChatStore();
+  const { activeConversation, messages, typingUsers, msgLoading, fetchMessages } = useChatStore();
   const { user } = useAuthStore();
   const [replyTo, setReplyTo] = useState(null);
   const [summary, setSummary] = useState('');
@@ -41,10 +37,10 @@ const ChatWindow = () => {
 
   const convId   = activeConversation?._id;
   const convMsgs = messages[convId] || [];
-  const typing   = typingUsers[convId] ? Object.values(typingUsers[convId]) : [];
+  const typing   = typingUsers[convId] || [];
 
   useEffect(() => {
-    if (convId && fetchMessages) fetchMessages(convId);
+    if (convId) fetchMessages(convId);
   }, [convId, fetchMessages]);
 
   useEffect(() => {
@@ -61,7 +57,7 @@ const ChatWindow = () => {
 
   const handleDelete = async (messageId) => {
     try {
-      if (chatAPI?.deleteMessage) await chatAPI.deleteMessage(messageId);
+      await chatAPI.deleteMessage(messageId);
     } catch {
       toast.error('Failed to delete message');
     }
@@ -70,12 +66,8 @@ const ChatWindow = () => {
   const handleSummarize = async () => {
     setSummaryLoading(true);
     try {
-      if (aiAPI?.summarize) {
-        const { data } = await aiAPI.summarize(convId);
-        setSummary(data.summary);
-      } else {
-        setSummary("AI Insight: All nodes operating securely. Sync protocol optimal.");
-      }
+      const { data } = await aiAPI.summarize(convId);
+      setSummary(data.summary);
       setShowSummary(true);
     } catch {
       toast.error('Could not summarize conversation');
@@ -84,36 +76,36 @@ const ChatWindow = () => {
     }
   };
 
+  // Get display info
   const getOtherParticipant = () => {
     if (activeConversation?.type === 'group') return null;
-    return activeConversation?.participants?.find((p) => p._id !== (user?._id || "ME"));
+    return activeConversation?.participants?.find((p) => p._id !== user?._id);
   };
 
   const headerName =
     activeConversation?.type === 'group'
       ? activeConversation.name
-      : getOtherParticipant()?.username || 'User Node';
+      : getOtherParticipant()?.username || 'Unknown';
 
   const headerSub =
     activeConversation?.type === 'group'
-      ? `${activeConversation.participants?.length || 0} members`
+      ? `${activeConversation.participants?.length} members`
       : getOtherParticipant()?.status === 'online'
       ? 'Online'
       : 'Offline';
 
-  // ─── 1. EMPTY STATE WELCOME WINDOW ────────────────────────────────────────
   if (!activeConversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-(--bg-primary) gap-4 select-none h-full w-full transition-colors duration-200">
-        <div className="w-20 h-20 rounded-3xl bg-linear-to-br from-brand-500/10 to-purple-500/10 border border-brand-500/20 flex items-center justify-center shadow-xs">
-          <Sparkles className="w-9 h-9 text-brand-500 animate-pulse" />
+      <div className="flex-1 flex flex-col items-center justify-center bg-(--bg-primary) gap-4 select-none">
+        <div className="w-20 h-20 rounded-3xl bg-linear-to-br from-brand-500/20 to-brand-700/20 flex items-center justify-center">
+          <Sparkles className="w-10 h-10 text-brand-500/60" />
         </div>
-        <div className="text-center px-4">
-          <h3 className="text-lg font-bold text-(--text-primary) tracking-tight">
-            Select a conversation stream
+        <div className="text-center">
+          <h3 className="text-xl font-display font-semibold text-(--text-primary) mb-1">
+            Select a conversation
           </h3>
-          <p className="text-(--text-muted) text-xs max-w-xs mt-1 leading-relaxed">
-            Choose a private pipeline chat from the left sidebar panel to start syncing messages.
+          <p className="text-(--text-muted) text-sm">
+            Choose a chat from the sidebar or start a new one
           </p>
         </div>
       </div>
@@ -121,102 +113,88 @@ const ChatWindow = () => {
   }
 
   return (
-    <div className="flex-1 h-full w-full flex flex-col min-w-0 overflow-hidden bg-(--bg-primary) relative transition-colors duration-200">
-      
-      {/* ─── 2. CHAT TOP HEADER BAR ─────────────────────────────────────────── */}
-      <div className="h-18 flex items-center justify-between px-6 border-b border-(--border) bg-(--bg-card) shrink-0 z-10 shadow-xs">
-        <div className="flex items-center gap-3 min-w-0">
-          
-          {/* 🌟 FIXED: Responsive Back Arrow Control Node (Only displays on mobile viewports) */}
-          <button 
-            onClick={() => setActiveConversation(null)} 
-            className="flex md:hidden p-2 -ml-2 rounded-xl text-(--text-muted) hover:text-(--text-primary) hover:bg-(--bg-secondary) transition-all active:scale-95 cursor-pointer shrink-0"
-            title="Go back to dashboard"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-
-          {activeConversation.type === 'group' ? (
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0">
-              {headerName.slice(0, 2).toUpperCase()}
-            </div>
-          ) : (
-            <Avatar user={getOtherParticipant() || { username: headerName, status: headerSub.toLowerCase() }} size="md" showStatus />
-          )}
-          <div className="min-w-0">
-            <h2 className="font-semibold text-sm text-(--text-primary) truncate leading-snug">{headerName}</h2>
-            <p className={`text-xs mt-0.5 font-medium ${headerSub === 'Online' ? 'text-emerald-500' : 'text-(--text-muted)'}`}>
-              {headerSub}
-            </p>
+    <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-(--bg-primary)">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-(--border) bg-(--bg-card) shrink-0">
+        {activeConversation.type === 'group' ? (
+          <div className="w-10 h-10 rounded-full bg-linear-to-br from-brand-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+            {headerName.slice(0, 2).toUpperCase()}
           </div>
+        ) : (
+          <Avatar user={getOtherParticipant()} size="md" showStatus />
+        )}
+        <div className="flex-1 min-w-0">
+          <h2 className="font-semibold text-(--text-primary) truncate">{headerName}</h2>
+          <p className={`text-xs ${headerSub === 'Online' ? 'text-emerald-500' : 'text-(--text-muted)'}`}>
+            {headerSub}
+          </p>
         </div>
 
-        {/* Action Controls */}
-        <div className="flex items-center gap-1 text-(--text-muted)">
+        {/* Header actions */}
+        <div className="flex items-center gap-1">
           <button
             onClick={handleSummarize}
             disabled={summaryLoading}
             title="Summarize with AI"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-brand-500/10 text-brand-600 dark:text-brand-400 hover:bg-brand-500/20 active:scale-95 transition-all disabled:opacity-50"
+            className="btn-ghost px-3 py-2 text-xs"
           >
             {summaryLoading ? (
-              <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            ) : <Bot className="w-3.5 h-3.5" />}
-            <span className="hidden sm:inline">AI Summary</span>
+              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+            ) : <Bot className="w-4 h-4" />}
+            <span className="hidden sm:inline">Summarize</span>
           </button>
-          <div className="w-px h-4 bg-(--border) mx-1 hidden sm:block" />
-          <button className="p-2 hover:text-(--text-primary) rounded-xl transition-colors hidden sm:block"><Phone className="w-4.5 h-4.5" /></button>
-          <button className="p-2 hover:text-(--text-primary) rounded-xl transition-colors hidden sm:block"><Video className="w-4.5 h-4.5" /></button>
-          <button className="p-2 hover:text-(--text-primary) rounded-xl transition-colors"><Info className="w-4.5 h-4.5" /></button>
         </div>
       </div>
 
-      {/* ─── 3. AI SUMMARY BANNER NOTIFICATION ──────────────────────────────── */}
+      {/* AI Summary Panel */}
       <AnimatePresence>
         {showSummary && summary && (
           <motion.div
-            initial={{ opacity: 0, y: -10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -10, height: 0 }}
-            className="px-6 py-3 bg-brand-500/5 border-b border-brand-500/20 text-sm overflow-hidden z-10"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mx-4 mt-3 p-4 rounded-xl bg-brand-500/10 border border-brand-500/20 text-sm"
           >
-            <div className="max-w-5xl mx-auto bg-(--bg-card) border border-brand-500/20 p-4 rounded-2xl shadow-xs">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-brand-500 font-bold text-xs uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} /> Generated Synopsis Node
-                </div>
-                <button onClick={() => setShowSummary(false)} className="text-(--text-muted) hover:text-(--text-primary) text-xs p-1 rounded-md hover:bg-(--bg-secondary)">
-                  ✕
-                </button>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-brand-500 font-semibold">
+                <Bot className="w-4 h-4" /> AI Summary
               </div>
-              <p className="text-(--text-primary) text-xs leading-relaxed font-medium whitespace-pre-wrap">{summary}</p>
+              <button onClick={() => setShowSummary(false)} className="text-(--text-muted) hover:text-(--text-primary) text-xs">
+                ✕
+              </button>
             </div>
+            <p className="text-(--text-primary) leading-relaxed whitespace-pre-wrap">{summary}</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ─── 4. SCROLLABLE MESSAGES FLOW STREAM ─────────────────────────────── */}
+      {/* Messages */}
       <div
         ref={containerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto px-6 py-6 space-y-4 min-h-0 bg-(--bg-primary) scroll-smooth"
+        className="flex-1 overflow-y-auto px-4 py-4 space-y-0"
       >
         {msgLoading ? (
-          <div className="h-full flex items-center justify-center">
-            <span className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex justify-center py-8">
+            <svg className="w-6 h-6 animate-spin text-brand-500" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
           </div>
         ) : convMsgs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16 gap-2">
-            <div className="w-12 h-12 rounded-2xl bg-(--bg-secondary) flex items-center justify-center text-xl border border-(--border) shadow-xs">💬</div>
-            <p className="text-(--text-primary) font-medium text-xs">No packets transmitted yet.</p>
-            <p className="text-(--text-muted) text-[11px]">Type a greeting down below to trigger synchronization stream!</p>
+          <div className="flex flex-col items-center justify-center h-full text-center py-16 gap-3">
+            <div className="w-16 h-16 rounded-2xl bg-(--bg-secondary) flex items-center justify-center text-3xl">💬</div>
+            <p className="text-(--text-muted) text-sm">No messages yet. Say hello!</p>
           </div>
         ) : (
           convMsgs.map((msg) => (
             <MessageBubble
               key={msg._id}
               message={msg}
-              isOwn={msg.sender?._id === (user?._id || "ME")}
+              isOwn={msg.sender?._id === user?._id}
               onReply={setReplyTo}
               onDelete={handleDelete}
               conversationId={convId}
@@ -228,30 +206,27 @@ const ChatWindow = () => {
         <div ref={bottomRef} />
       </div>
 
-      {/* Floating Scroll to Bottom Controller */}
+      {/* Scroll to bottom btn */}
       <AnimatePresence>
         {showScrollBtn && (
           <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 10 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
             onClick={scrollToBottom}
-            className="absolute bottom-24 right-6 w-9 h-9 rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-md flex items-center justify-center transition-all active:scale-90 z-20"
+            className="absolute bottom-24 right-6 w-9 h-9 rounded-full bg-brand-600 text-white shadow-lg flex items-center justify-center hover:bg-brand-500 transition-colors z-10"
           >
             <ChevronDown className="w-4 h-4" />
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* ─── 5. FIXED INPUT FIELD CHANNEL FOOTER ────────────────────────────── */}
-      <div className="bg-(--bg-card) border-t border-(--border) shrink-0 z-10">
-        <MessageInput
-          conversationId={convId}
-          replyTo={replyTo}
-          onClearReply={() => setReplyTo(null)}
-        />
-      </div>
-
+      {/* Input */}
+      <MessageInput
+        conversationId={convId}
+        replyTo={replyTo}
+        onClearReply={() => setReplyTo(null)}
+      />
     </div>
   );
 };

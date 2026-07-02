@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Bot, X, Sparkles} from 'lucide-react';
+import { Send, Bot, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import useChatStore from '../../context/chatStore.js';
@@ -33,8 +33,6 @@ const MessageInput = ({ conversationId, replyTo, onClearReply }) => {
       await sendMessage(conversationId, text, replyTo?._id || null);
       onClearReply?.();
     } catch (err) {
-      //somechange
-      console.log(err)
       toast.error('Failed to send message');
       setContent(text);
     }
